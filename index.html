@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>表示テスト</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif; background: #f5eeeb; color: #2e2420; font-size: 17px; line-height: 1.7; padding: 24px 16px 60px; }
+  .card { max-width: 480px; margin: 0 auto; background: #fff; border: 1px solid #e8d5d0; border-radius: 16px; padding: 24px 20px; }
+  h1 { font-size: 22px; color: #5e4c3d; margin-bottom: 6px; }
+  .sub { font-size: 14px; color: #7a6560; margin-bottom: 20px; }
+  .step { display: flex; gap: 12px; padding: 14px 0; border-top: 1px solid #e8d5d0; }
+  .mark { flex: 0 0 32px; font-size: 22px; line-height: 1.4; text-align: center; }
+  .name { font-weight: 500; }
+  .detail { font-size: 14px; color: #7a6560; word-break: break-all; }
+  .ok .mark { color: #25863a; }
+  .ng .mark { color: #b03030; }
+  .wait .mark { color: #a89b94; }
+  .report { margin-top: 20px; padding: 12px; background: #fdf8f6; border: 1px dashed #ce8e8e; border-radius: 10px; font-size: 13px; color: #5e4c3d; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>表示テスト</h1>
+  <p class="sub">このページが表示され、下の3つに ✓ が付けば成功です。</p>
+
+  <div id="s1" class="step ok"><div class="mark">✓</div><div><div class="name">① このページの表示</div><div class="detail">表示できています</div></div></div>
+  <div id="s2" class="step wait"><div class="mark">…</div><div><div class="name">② Apps Script との通信</div><div class="detail">確認中</div></div></div>
+  <div id="s3" class="step wait"><div class="mark">…</div><div><div class="name">③ イベント情報の取得</div><div class="detail">確認中</div></div></div>
+
+  <div id="report" class="report"></div>
+</div>
+
+<script>
+// テスト用 Apps Script の /exec URL
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxoRriu9pBSRITtpVqG5hgiiOf1vaMATgiBA3c6RubSxK5VIfbyTRe77bitzV48P8OU9g/exec";
+// 取得するイベントID（ページのURLに ?id=w2026k のように付けると変えられる）
+var params = new URLSearchParams(location.search);
+var EVENT_ID = params.get("id") || "labo";
+
+var lines = ["UA: " + navigator.userAgent];
+
+function setStep(id, ok, text) {
+  var el = document.getElementById(id);
+  el.className = "step " + (ok ? "ok" : "ng");
+  el.querySelector(".mark").textContent = ok ? "✓" : "✗";
+  el.querySelector(".detail").textContent = text;
+}
+function addReport(t) {
+  lines.push(t);
+  document.getElementById("report").textContent = lines.join("\n");
+}
+addReport("① 表示: OK");
+
+function call(query) {
+  var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+  return fetch(GAS_URL + "?" + query, ctrl ? { signal: ctrl.signal } : {})
+    .then(function (r) { clearTimeout(timer); return r.json(); })
+    .catch(function (e) { clearTimeout(timer); throw e; });
+}
+
+call("api=ping")
+  .then(function (j) {
+    if (!j.ok) throw new Error("応答が不正です");
+    setStep("s2", true, "通信できました（" + j.time + "）");
+    addReport("② 通信: OK");
+  })
+  .catch(function (e) {
+    setStep("s2", false, "失敗: " + e);
+    addReport("② 通信: NG " + e);
+  })
+  .then(function () {
+    return call("api=event&id=" + encodeURIComponent(EVENT_ID));
+  })
+  .then(function (j) {
+    if (!j.ok) throw new Error(j.error || "取得できません");
+    setStep("s3", true, j.eventName + " / " + j.date + " / " + j.venue + (j.isWaitMode ? "（キャンセル待ち）" : ""));
+    addReport("③ イベント情報: OK " + j.eventName);
+  })
+  .catch(function (e) {
+    setStep("s3", false, "失敗: " + e);
+    addReport("③ イベント情報: NG " + e);
+  });
+</script>
+</body>
+</html>
