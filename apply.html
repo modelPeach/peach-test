@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>お申し込み</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --brown: #5e4c3d; --rose: #ce8e8e; --blush: #fed3cf; --cream: #fdf8f6; --white: #ffffff; --text: #2e2420; --muted: #7a6560; --border: #e8d5d0; --line-green: #06c755; --red: #b03030; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f5eeeb; font-family: 'Noto Sans JP', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.75; color: var(--text); min-height: 100vh; padding: 20px 0 100px; -webkit-text-size-adjust: 100%; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 14px; }
+  .card { background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(94,76,61,0.14); border: 1px solid var(--border); }
+  .line-banner { background: var(--line-green); color: #fff; text-align: center; padding: 12px; font-size: 16px; font-weight: 700; letter-spacing: .05em; }
+  .hero-img { width: 100%; display: block; object-fit: cover; max-height: 250px; }
+
+  /* ── 申込フォーム ── */
+  .form-body { padding: 28px 24px 32px; }
+  .page-band { background: var(--brown); margin: -28px -24px 24px; padding: 13px; text-align: center; }
+  #header-tag-text { color: #fff; font-size: 16px; font-weight: 500; letter-spacing: .1em; }
+  .web-title { font-size: 22px; font-weight: 700; line-height: 1.5; color: var(--brown); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 2px solid var(--blush); }
+  .event-meta { margin-bottom: 24px; font-size: 17px; font-weight: 500; line-height: 1.9; }
+  #error-msg { background: #fff0f0; border: 1.5px solid #e08080; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 500; color: var(--red); margin-bottom: 20px; display: none; }
+  .field { margin-bottom: 22px; }
+  .field label { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; color: var(--brown); margin-bottom: 8px; }
+  .req-tag, .opt-tag { color: #fff; font-size: 12px; font-weight: 500; line-height: 1; padding: 4px 8px; border-radius: 4px; }
+  .req-tag { background: var(--rose); }
+  .opt-tag { background: #a89b94; }
+  .note { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .hint { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.7; }
+  input, select, textarea { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 17px; font-weight: 400; background: var(--cream); outline: none; font-family: inherit; color: var(--text); }
+  input:focus, select:focus, textarea:focus { border-color: var(--rose); background: #fff; }
+  .fee-box { display: flex; align-items: baseline; justify-content: space-between; background: var(--cream); border: 1.5px solid var(--blush); border-radius: 12px; padding: 16px 20px; margin: 24px 0; }
+  .fee-label { font-size: 16px; font-weight: 500; color: var(--brown); }
+  .fee-amount { font-size: 32px; font-weight: 700; color: var(--brown); letter-spacing: .02em; }
+  .yen { font-size: 16px; font-weight: 500; margin-left: 2px; }
+  .btn-submit { width: 100%; padding: 17px; background: var(--brown); color: var(--white); border: none; border-radius: 12px; font-size: 18px; font-weight: 700; letter-spacing: .06em; cursor: pointer; font-family: inherit; }
+  .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-secondary { width: 100%; padding: 15px; background: #fff; color: var(--muted); border: 1.5px solid var(--border); border-radius: 12px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 12px; font-family: inherit; }
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+  #loading { display: none; text-align: center; margin-top: 16px; color: var(--brown); font-size: 16px; font-weight: 500; animation: blink 1s infinite; }
+  .caution { background: #fff8e1; border: 1.5px solid #f5c400; border-radius: 10px; padding: 13px 16px; margin-bottom: 16px; font-size: 14.5px; font-weight: 400; color: #5e4000; line-height: 1.8; }
+  .caution .red, .red { color: var(--red); font-weight: 500; }
+  .wait-mode-banner { background: #fff0f0; border: 1.5px solid var(--rose); border-radius: 10px; padding: 13px 16px; margin-bottom: 20px; font-size: 15px; font-weight: 400; color: var(--red); line-height: 1.8; display: none; }
+  .wait-mode-banner strong { font-weight: 700; }
+  .wait-mode-banner.show { display: block; }
+  .wait-hint { font-size: 14px; color: #5e4000; margin-top: 6px; line-height: 1.7; display: none; }
+  .wait-hint strong { font-weight: 700; }
+  .wait-hint.show { display: block; }
+  .survey-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0 22px; }
+  .survey-intro { font-size: 15px; color: var(--muted); margin-bottom: 20px; line-height: 1.8; }
+  .survey-intro .sub { font-size: 14px; }
+  .survey-thanks { font-size: 14px; color: var(--muted); margin: 18px 0 6px; line-height: 1.8; text-align: center; }
+
+  /* ── 締切 ── */
+  .closed-box { text-align: center; padding: 20px 0; }
+  .closed-title { font-size: 20px; font-weight: 700; color: var(--red); }
+  .closed-msg { font-size: 15px; color: var(--muted); margin: 12px 0; white-space: pre-wrap; }
+  .line-btn { display: block; background: var(--line-green); color: #fff; text-align: center; padding: 16px; border-radius: 12px; text-decoration: none; font-size: 17px; font-weight: 700; margin: 20px 0; }
+  .tel-area { text-align: center; margin-top: 10px; }
+  .tel-area a { color: var(--brown); text-decoration: none; font-size: 22px; font-weight: 700; }
+
+  /* ── 確認・完了：項目の行 ── */
+  .confirm-title { font-size: 17px; font-weight: 500; color: var(--brown); margin-bottom: 14px; text-align: center; line-height: 1.7; }
+  .conf-row, .detail-row { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); align-items: baseline; }
+  .conf-k, .dk { flex: 0 0 104px; font-size: 14px; font-weight: 500; color: var(--muted); }
+  .conf-v, .dv { flex: 1; font-size: 17px; font-weight: 500; color: var(--text); word-break: break-all; line-height: 1.6; }
+  .conf-row.stack { flex-direction: column; gap: 2px; }
+  .conf-row.stack .conf-k { flex: none; }
+
+  /* ── 完了画面 ── */
+  #result-area { display: none; padding-bottom: 28px; }
+  .result-header { background: var(--brown); padding: 40px 24px 28px; text-align: center; }
+  .done-label { font-size: 17px; font-weight: 700; letter-spacing: .08em; color: var(--rose); margin-bottom: 8px; }
+  .done-name { font-size: 22px; font-weight: 700; color: #fff; }
+  .no-number { font-size: 84px; font-weight: 700; color: var(--brown); text-align: center; line-height: 1; padding: 22px 0 26px; letter-spacing: .02em; }
+  .no-label { font-size: 16px; font-weight: 500; color: var(--muted); margin-bottom: 12px; letter-spacing: .08em; line-height: 1.4; }
+  .result-detail { padding: 6px 24px 14px; }
+  .wait-msg-style { padding: 15px 20px 8px; color: var(--red); font-size: 16px; font-weight: 700; text-align: center; background: #fff0f0; margin: 5px 22px 0; border-radius: 10px 10px 0 0; display: none; }
+  .wait-sub-style { padding: 0 20px 15px; color: var(--red); font-size: 14px; font-weight: 400; text-align: center; background: #fff0f0; margin: 0 22px 16px; border-radius: 0 0 10px 10px; line-height: 1.7; display: none; }
+  .ss-info { padding: 15px; text-align: center; background: var(--cream); margin: 16px 22px 0; border-radius: 10px; border: 1px dashed var(--rose); font-size: 15px; font-weight: 500; color: var(--brown); line-height: 1.7; }
+  .mail-note { display: none; margin: 16px 22px 0; padding: 13px 14px; border-radius: 10px; font-size: 15px; font-weight: 500; line-height: 1.6; text-align: center; }
+  .mail-note.ok { background: #eef8f0; border: 1px solid #9fd1aa; color: #25623a; }
+  .mail-note.fail { background: #fff0f0; border: 1px solid #e08080; color: var(--red); }
+  .loading-msg { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 16px; }
+  a { color: var(--brown); }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card" id="app"><div class="loading-msg">読み込み中...</div></div></div>
+<script>
+// ▼ Apps Script の /exec URL（本番に切り替えるときはここだけ変える）
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxoRriu9pBSRITtpVqG5hgiiOf1vaMATgiBA3c6RubSxK5VIfbyTRe77bitzV48P8OU9g/exec";
+
+// イーゼル欄を表示する参加区分
+var EASEL_TYPES = ['U-20', '学生'];
+var EASEL_KEY = 'イーゼル・画板';
+
+var cfg = null, cf = 0, isSubmitting = false;
+
+function $(id) { return document.getElementById(id); }
+
+// 要素を作る小さな道具（文字は textContent で入れるので安全）
+function h(tag, attrs, kids) {
+  var e = document.createElement(tag);
+  if (attrs) {
+    for (var k in attrs) {
+      var v = attrs[k];
+      if (k === 'text') e.textContent = v;
+      else if (typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    }
+  }
+  (kids || []).forEach(function (c) {
+    if (c === null || c === undefined) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+function toTop() {
+  window.scrollTo(0, 0);
+  try { parent.postMessage("scrollToTop", "*"); } catch (e) {}
+}
+
+/* ─── Apps Script との通信 ─── */
+function apiGet(query) {
+  return fetch(GAS_URL + '?' + query).then(function (r) { return r.json(); });
+}
+function apiPost(obj) {
+  // Content-Type を付けない（text/plain 扱い）と、事前確認なしで送れる
+  return fetch(GAS_URL, { method: 'POST', body: JSON.stringify(obj) }).then(function (r) { return r.json(); });
+}
+function errText(e) {
+  return (e && e.isApi) ? e.message : '通信に失敗しました。電波の良い場所で、もう一度お試しください。';
+}
+
+/* ─── 画面の部品 ─── */
+function tag(kind) {
+  return h('span', { 'class': kind === 'req' ? 'req-tag' : 'opt-tag', 'text': kind === 'req' ? '必須' : '任意' });
+}
+function fieldBlock(labelKids, control, hint) {
+  var d = h('div', { 'class': 'field' }, [h('label', null, labelKids), control]);
+  if (hint) d.appendChild(hint);
+  return d;
+}
+function select(id, opts, onchange) {
+  var attrs = { 'id': id };
+  if (onchange) attrs.onchange = onchange;
+  var s = h('select', attrs, [h('option', { 'value': '', 'text': '選択してください' })]);
+  opts.forEach(function (o) { s.appendChild(h('option', { 'value': o, 'text': o })); });
+  return s;
+}
+function confRow(k, v, stack) {
+  return h('div', { 'class': 'conf-row' + (stack ? ' stack' : '') }, [
+    h('div', { 'class': 'conf-k', 'text': k }),
+    h('div', { 'class': 'conf-v', 'text': v })
+  ]);
+}
+
+var RESULT_HTML =
+  '<div class="result-header"><div class="done-label" id="done-label-text">● 申込完了 ●</div>' +
+  '<div class="done-name"><span id="user-name"></span> 様</div></div>' +
+  '<div class="no-number"><div class="no-label" id="no-label">受付番号</div><div id="no-disp"></div></div>' +
+  '<div id="wait-msg" class="wait-msg-style">満席のため、キャンセル待ちで承りました。</div>' +
+  '<div id="wait-sub" class="wait-sub-style">キャンセル待ちをご希望されない場合は、お手数ですが公式LINEまたはお電話にてご連絡ください。</div>' +
+  '<div class="result-detail">' +
+  '<div class="detail-row"><div class="dk">イベント</div><div class="dv" id="res-event"></div></div>' +
+  '<div class="detail-row"><div class="dk">日程</div><div class="dv" id="res-date"></div></div>' +
+  '<div class="detail-row"><div class="dk">会場</div><div class="dv" id="res-venue"></div></div>' +
+  '<div id="res-type-row" class="detail-row" style="display:none"><div class="dk">区分</div><div class="dv" id="res-type"></div></div>' +
+  '<div id="res-course-row" class="detail-row" style="display:none"><div class="dk">コース</div><div class="dv" id="res-course"></div></div>' +
+  '<div class="detail-row"><div class="dk">参加費</div><div class="dv"><span id="res-fee"></span> 円</div></div>' +
+  '<div id="res-easel-row" class="detail-row" style="display:none"><div class="dk">イーゼル/画板</div><div class="dv" id="res-easel"></div></div>' +
+  '</div>' +
+  '<div id="mail-note" class="mail-note"></div>' +
+  '<div id="ss-info" class="ss-info">この画面をスクリーンショットして<br>控えとしてお使いください</div>';
+
+/* ─── 画面の組み立て ─── */
+function render() {
+  document.title = cfg.eventName;
+  var app = $('app');
+  app.innerHTML = '';
+  if (cfg.src === 'line') app.appendChild(h('div', { 'class': 'line-banner', 'text': 'LINE専用申込画面' }));
+  if (cfg.imageUrl) app.appendChild(h('img', { 'class': 'hero-img', 'src': cfg.imageUrl, 'alt': '' }));
+
+  var body = h('div', { 'class': 'form-body', 'id': 'form-body-main' });
+  body.appendChild(h('div', { 'class': 'page-band' }, [h('span', { 'id': 'header-tag-text', 'text': 'イベント参加申込フォーム' })]));
+  body.appendChild(h('div', { 'class': 'web-title', 'text': cfg.eventName }));
+
+  if (cfg.isClosed) {
+    body.appendChild(buildClosed());
+  } else {
+    body.appendChild(h('div', { 'class': 'event-meta' }, [
+      h('div', { 'text': '日程：' + cfg.eventDate }),
+      h('div', { 'text': '会場：' + cfg.venue })
+    ]));
+    body.appendChild(buildForm());
+    body.appendChild(buildConfirm());
+  }
+  app.appendChild(body);
+
+  var res = h('div', { 'id': 'result-area' });
+  res.innerHTML = RESULT_HTML;
+  app.appendChild(res);
+
+  if (!cfg.isClosed) { updateFee(); toggleEaselField(); }
+}
+
+function buildClosed() {
+  var box = h('div', { 'class': 'closed-box' }, [
+    h('p', { 'class': 'closed-title', 'text': 'お申し込みは締め切りました' }),
+    h('p', { 'class': 'closed-msg', 'text': cfg.closedMsg }),
+    h('a', { 'class': 'line-btn', 'href': cfg.lineUrl, 'text': '公式LINEでお問い合わせ' })
+  ]);
+  if (cfg.closedMsg === 'お問い合わせは公式LINE、またはお電話にてお願いします。') {
+    box.appendChild(h('div', { 'class': 'tel-area' }, [h('a', { 'href': 'tel:' + cfg.tel, 'text': '☎ ' + cfg.tel })]));
+  }
+  return box;
+}
+
+function buildForm() {
+  var f = h('div', { 'id': 'form-area' });
+
+  var banner = h('div', { 'id': 'wait-mode-banner', 'class': 'wait-mode-banner' + (cfg.isWaitMode ? ' show' : '') });
+  banner.innerHTML = '⏳ ただいま満席のため、<strong>キャンセル待ち</strong>で受付中<br>キャンセル発生次第、ご登録の電話番号にご連絡いたします。';
+  f.appendChild(banner);
+  f.appendChild(h('div', { 'id': 'error-msg' }));
+
+  f.appendChild(fieldBlock(['氏名', tag('req')], h('input', { 'id': 'f-name', 'placeholder': '山田 花子', 'autocomplete': 'name' })));
+  f.appendChild(fieldBlock(['電話番号', tag('req'), h('span', { 'class': 'note', 'text': '（ハイフンなし）' })],
+    h('input', { 'id': 'f-tel', 'type': 'tel', 'placeholder': '09012345678', 'inputmode': 'numeric', 'autocomplete': 'tel' })));
+
+  if (cfg.typeOpts.length) {
+    f.appendChild(fieldBlock(['参加区分', tag('req')], select('f-type', cfg.typeOpts, function () { updateFee(); toggleEaselField(); })));
+  }
+  if (cfg.easelOpts.length) {
+    var eb = fieldBlock(['イーゼル・画板'], select('f-easel', cfg.easelOpts));
+    eb.id = 'easel-field';
+    eb.style.display = 'none';
+    f.appendChild(eb);
+  }
+  if (cfg.courseOpts.length) {
+    f.appendChild(fieldBlock(['参加コース', tag('req')], select('f-course', cfg.courseOpts, updateFee)));
+  }
+
+  f.appendChild(h('div', { 'class': 'fee-box' }, [
+    h('span', { 'class': 'fee-label', 'text': '参加費' }),
+    h('span', { 'class': 'fee-amount', 'id': 'fee-display' })
+  ]));
+
+  if (cfg.surveyItems.length) {
+    f.appendChild(h('hr', { 'class': 'survey-divider' }));
+    var intro = h('div', { 'class': 'survey-intro' });
+    intro.innerHTML = '📝 よろしければアンケートにご回答ください。<br><span class="sub">回答しない場合はそのまま下のボタンへ進んでください。</span>';
+    f.appendChild(intro);
+    cfg.surveyItems.forEach(function (item) {
+      var ctl, hint = null;
+      if (item.type === '選択') {
+        ctl = select('', item.options);
+        ctl.removeAttribute('id');
+      } else if (item.type === '記述（大）') {
+        ctl = h('textarea', { 'rows': '3' });
+        if (item.name.indexOf('連絡') !== -1 || item.name.indexOf('その他') !== -1) {
+          hint = h('div', { 'class': 'wait-hint' + (cfg.isWaitMode ? ' show' : '') });
+          hint.innerHTML = '⏰ キャンセル待ちのため、<strong>お電話可能な時間帯</strong>もご記入いただけると助かります。（例：平日18〜21時）';
+        }
+      } else {
+        ctl = h('input', {});
+      }
+      ctl.className = 'svy';
+      ctl.setAttribute('data-key', item.name);
+      f.appendChild(fieldBlock([item.name], ctl, hint));
+    });
+  }
+
+  f.appendChild(fieldBlock(['メールアドレス', tag('opt')],
+    h('input', { 'id': 'f-email', 'type': 'email', 'inputmode': 'email', 'autocomplete': 'email', 'autocapitalize': 'off', 'placeholder': 'example@gmail.com' }),
+    h('div', { 'class': 'hint', 'text': '控えが必要な方のみ入力してください。' })));
+
+  var caution = h('div', { 'class': 'caution' });
+  caution.innerHTML = '⚠️ 申込完了後、「<span class="red">受付番号</span>」が表示されます。<br>表示されない場合はエラーのためご連絡ください。';
+  f.appendChild(caution);
+
+  f.appendChild(h('button', { 'id': 'btn-go-confirm', 'class': 'btn-submit', 'text': '確認画面へ進む', 'onclick': showConfirmWindow }));
+  f.appendChild(h('div', { 'style': 'height:100px;' }));
+  return f;
+}
+
+function buildConfirm() {
+  var c = h('div', { 'id': 'confirm-area', 'style': 'display:none;' });
+  c.appendChild(h('p', { 'class': 'confirm-title', 'text': '以下の内容でお申し込みを確定しますか？' }));
+  c.appendChild(h('div', { 'id': 'confirm-dynamic-content' }));
+  var thanks = h('div', { 'id': 'survey-thanks', 'class': 'survey-thanks', 'style': 'display:none;' });
+  thanks.innerHTML = '📝 アンケートのご回答もありがとうございます。<br>内容はこのまま送信されます。';
+  c.appendChild(thanks);
+  c.appendChild(h('button', { 'id': 'btn', 'class': 'btn-submit', 'text': 'この内容で申込を確定する', 'onclick': submitForm }));
+  c.appendChild(h('button', { 'id': 'btn-back', 'class': 'btn-secondary', 'text': '修正する', 'onclick': hideConfirmWindow }));
+  c.appendChild(h('div', { 'id': 'loading', 'text': '送信中...' }));
+  c.appendChild(h('div', { 'style': 'height:100px;' }));
+  return c;
+}
+
+/* ─── 動作 ─── */
+function showError(msg) {
+  var eb = $('error-msg');
+  eb.textContent = msg;
+  eb.style.display = 'block';
+  toTop();
+}
+
+function updateFee() {
+  var tEl = $('f-type'), cEl = $('f-course');
+  var type = (cfg.src === 'line') ? 'LINE' : (tEl ? tEl.value : '一般');
+  var course = cEl ? cEl.value : '';
+  var fm = {};
+  String(cfg.feeSettings || '').split(/[;,]/).forEach(function (i) {
+    var idx = i.lastIndexOf(':');
+    if (idx < 1) return;
+    fm[i.substring(0, idx).trim()] = i.substring(idx + 1).trim();
+  });
+  var f = fm[type + '+' + course];
+  if (f === undefined) f = fm[type];
+  if (f === undefined) f = fm[course];
+  var d = $('fee-display');
+  d.innerHTML = '';
+  if (f !== undefined) {
+    cf = Number(f);
+    d.appendChild(document.createTextNode(cf.toLocaleString()));
+  } else {
+    cf = 0;
+    d.appendChild(document.createTextNode('—'));
+  }
+  d.appendChild(h('span', { 'class': 'yen', 'text': '円' }));
+}
+
+function toggleEaselField() {
+  var box = $('easel-field');
+  if (!box) return;
+  var typeEl = $('f-type'), sel = $('f-easel');
+  var show = !typeEl || EASEL_TYPES.indexOf(typeEl.value) !== -1;
+  box.style.display = show ? 'block' : 'none';
+  if (!show && sel) sel.value = '';
+}
+
+function showConfirmWindow() {
+  $('error-msg').style.display = 'none';
+  var n = $('f-name').value.trim();
+  var t = $('f-tel').value.trim();
+  var typeEl = $('f-type'), courseEl = $('f-course');
+  var mail = $('f-email').value.trim();
+
+  if (!n) { showError('氏名を入力してください。'); return; }
+  if (!t) { showError('電話番号を入力してください。'); return; }
+  if (!/^\d{10,11}$/.test(t.replace(/\D/g, ''))) { showError('電話番号は10〜11桁の数字で入力してください（ハイフン不要）。'); return; }
+  if (typeEl && !typeEl.value) { showError('参加区分を選択してください。'); return; }
+  if (courseEl && !courseEl.value) { showError('参加コースを選択してください。'); return; }
+  if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+    showError('メールアドレスの形式が正しくありません。控えが不要な場合は空欄のままにしてください。');
+    return;
+  }
+
+  var btn = $('btn-go-confirm');
+  btn.disabled = true;
+  btn.textContent = '確認中...';
+  var q = 'api=check&name=' + encodeURIComponent(cfg.eventName) + '&date=' + encodeURIComponent(cfg.eventDateIso) + '&tel=' + encodeURIComponent(t);
+  apiGet(q).then(function (j) {
+    btn.disabled = false;
+    btn.textContent = '確認画面へ進む';
+    if (!j.ok) { showError('確認中にエラーが発生しました。もう一度お試しください。'); return; }
+    if (j.duplicate) { showError('このイベントには既にお申し込み済みです。'); return; }
+    showConfirmContent(n, t, typeEl, courseEl, mail);
+  }).catch(function () {
+    btn.disabled = false;
+    btn.textContent = '確認画面へ進む';
+    showError('確認中にエラーが発生しました。もう一度お試しください。');
+  });
+}
+
+function showConfirmContent(n, t, typeEl, courseEl, mail) {
+  var box = $('confirm-dynamic-content');
+  box.innerHTML = '';
+  box.appendChild(confRow('氏名', n));
+  box.appendChild(confRow('電話番号', t));
+  if (typeEl && typeEl.value) box.appendChild(confRow('参加区分', typeEl.value));
+  var easel = $('f-easel');
+  if (easel && easel.value) box.appendChild(confRow('イーゼル/画板', easel.value));
+  if (courseEl && courseEl.value) box.appendChild(confRow('参加コース', courseEl.value));
+  box.appendChild(confRow('参加費', cf ? cf.toLocaleString() + ' 円' : '— 円'));
+  if (mail) box.appendChild(confRow('控えメール', mail));
+
+  var hasSurvey = false;
+  var items = document.querySelectorAll('.svy');
+  for (var i = 0; i < items.length; i++) {
+    var v = items[i].value.trim();
+    if (v !== '') {
+      box.appendChild(confRow(items[i].getAttribute('data-key'), v, true));
+      hasSurvey = true;
+    }
+  }
+  $('survey-thanks').style.display = hasSurvey ? 'block' : 'none';
+  $('header-tag-text').textContent = '申込内容の確認';
+  $('form-area').style.display = 'none';
+  $('confirm-area').style.display = 'block';
+  toTop();
+}
+
+function hideConfirmWindow() {
+  $('header-tag-text').textContent = 'イベント参加申込フォーム';
+  $('confirm-area').style.display = 'none';
+  $('form-area').style.display = 'block';
+  toTop();
+}
+
+function submitForm() {
+  if (isSubmitting) return;
+  isSubmitting = true;
+  $('btn').disabled = true;
+  $('btn-back').disabled = true;
+  $('loading').style.display = 'block';
+
+  var typeEl = $('f-type'), courseEl = $('f-course'), easelEl = $('f-easel');
+  var mail = $('f-email').value.trim();
+  var easel = easelEl ? easelEl.value : '';
+
+  var d = {
+    _eventName: cfg.eventName,
+    _eventDateIso: cfg.eventDateIso,
+    _venue: cfg.venue,
+    _src: cfg.src,
+    _calculatedFee: cf
+  };
+  d['氏名'] = $('f-name').value.trim();
+  d['電話番号'] = $('f-tel').value.trim();
+  if (typeEl && typeEl.value) d['参加区分'] = typeEl.value;
+  if (courseEl && courseEl.value) d['参加コース'] = courseEl.value;
+  if (easel) d[EASEL_KEY] = easel;
+  if (mail) d['_email'] = mail;
+  var items = document.querySelectorAll('.svy');
+  for (var i = 0; i < items.length; i++) {
+    var v = items[i].value.trim();
+    if (v !== '') d[items[i].getAttribute('data-key')] = v;
+  }
+
+  apiPost(d).then(function (j) {
+    if (!j.ok) { var err = new Error(j.error || 'エラーが発生しました。'); err.isApi = true; throw err; }
+    showResult(j.result, mail, easel);
+  }).catch(function (e) {
+    hideConfirmWindow();
+    showError(errText(e));
+    isSubmitting = false;
+    $('btn').disabled = false;
+    $('btn-back').disabled = false;
+    $('loading').style.display = 'none';
+  });
+}
+
+function showResult(res, mail, easel) {
+  $('res-event').textContent = res.event;
+  $('res-date').textContent = res.date;
+  $('res-venue').textContent = res.venue || cfg.venue;
+  if (res.type) { $('res-type').textContent = res.type; $('res-type-row').style.display = 'flex'; }
+  if (res.course) { $('res-course').textContent = res.course; $('res-course-row').style.display = 'flex'; }
+  if (easel) { $('res-easel').textContent = easel; $('res-easel-row').style.display = 'flex'; }
+  $('res-fee').textContent = Number(cf).toLocaleString();
+  $('user-name').textContent = res.name;
+
+  if (res.status === 'wait') {
+    $('done-label-text').textContent = '受付完了【キャンセル待ち】';
+    $('no-label').textContent = 'キャンセル待ち番号';
+    $('no-disp').textContent = res.waitNo;
+    $('no-disp').style.color = '#b03030';
+    $('wait-msg').style.display = 'block';
+    $('wait-sub').style.display = 'block';
+  } else {
+    $('no-disp').textContent = res.no;
+  }
+
+  var note = $('mail-note');
+  if (mail && res.mailSent === true) {
+    note.className = 'mail-note ok';
+    note.textContent = '控えメールを送信しました。';
+    note.style.display = 'block';
+  } else if (mail && res.mailSent === false) {
+    note.className = 'mail-note fail';
+    note.textContent = '控えメールを送信できませんでした。申込は完了しています。';
+    note.style.display = 'block';
+  }
+  $('ss-info').style.display = (mail && res.mailSent === true) ? 'none' : 'block';
+
+  $('form-body-main').style.display = 'none';
+  $('result-area').style.display = 'block';
+  toTop();
+}
+
+/* ─── 起動 ─── */
+(function () {
+  var p = new URLSearchParams(location.search);
+  var id = p.get('id') || '', name = p.get('name') || '', src = (p.get('src') || 'web').toLowerCase();
+  var app = $('app');
+  if (!id && !name) {
+    app.innerHTML = '<div class="loading-msg">URLパラメータが不足しています。</div>';
+    return;
+  }
+  apiGet('api=config&id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name) + '&src=' + encodeURIComponent(src))
+    .then(function (j) {
+      if (!j.ok) throw new Error(j.error || 'エラー');
+      cfg = j.config;
+      render();
+    })
+    .catch(function (e) {
+      app.innerHTML = '';
+      app.appendChild(h('div', { 'class': 'loading-msg', 'text': '読み込めませんでした。時間をおいて、もう一度お試しください。' }));
+    });
+})();
+</script>
+</body>
+</html>
